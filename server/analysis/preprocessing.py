@@ -51,13 +51,9 @@ class Bin(Preprocess):
         if self.axis_ is None:
             self.deciles_ = get_deciles(matrix, self.axis_)
         elif self.axis_ == 0:  # Bin columns
-            self.deciles_ = []
-            for col in matrix.T:
-                self.deciles_.append(get_deciles(col, axis=None))
+            self.deciles_ = [get_deciles(col, axis=None) for col in matrix.T]
         elif self.axis_ == 1:  # Bin rows
-            self.deciles_ = []
-            for row in matrix:
-                self.deciles_.append(get_deciles(row, axis=None))
+            self.deciles_ = [get_deciles(row, axis=None) for row in matrix]
         return self
 
     def transform(self, matrix, copy=True):
@@ -66,16 +62,16 @@ class Bin(Preprocess):
             res = bin_by_decile(matrix, self.deciles_,
                                 self.bin_start_, self.axis_)
         elif self.axis_ == 0:  # Transform columns
-            columns = []
-            for col, decile in zip(matrix.T, self.deciles_):
-                columns.append(bin_by_decile(col, decile,
-                                             self.bin_start_, axis=None))
+            columns = [
+                bin_by_decile(col, decile, self.bin_start_, axis=None)
+                for col, decile in zip(matrix.T, self.deciles_)
+            ]
             res = np.vstack(columns).T
         elif self.axis_ == 1:  # Transform rows
-            rows = []
-            for row, decile in zip(matrix, self.deciles_):
-                rows.append(bin_by_decile(row, decile,
-                                          self.bin_start_, axis=None))
+            rows = [
+                bin_by_decile(row, decile, self.bin_start_, axis=None)
+                for row, decile in zip(matrix, self.deciles_)
+            ]
             res = np.vstack(rows)
         assert res.shape == matrix.shape
         return res
